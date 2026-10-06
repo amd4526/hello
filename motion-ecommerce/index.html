@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>NOVA — Motion design e-commerce</title>
+<style>
+  :root {
+    --bg: #0b0a14;
+    --bg2: #15122a;
+    --ink: #f6f3ee;
+    --muted: #a39fb8;
+    --violet: #7c5cff;
+    --coral: #ff6b8b;
+    --amber: #ffb86b;
+    --grad: linear-gradient(120deg, var(--violet) 0%, var(--coral) 60%, var(--amber) 100%);
+    --ease: cubic-bezier(.16, 1, .3, 1);      /* expo out */
+    --ease-io: cubic-bezier(.76, 0, .24, 1);  /* quart in-out */
+    --spring: cubic-bezier(.34, 1.56, .64, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  body { font-family: "Inter Display", "Inter", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: radial-gradient(ellipse at 50% 120%, var(--bg2), var(--bg) 70%); }
+
+  /* ---------- ambient background ---------- */
+  .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: .55; }
+  .blob.b1 { width: 900px; height: 900px; background: var(--violet); left: -200px; top: -300px; animation: drift1 27s linear 0s both; }
+  .blob.b2 { width: 800px; height: 800px; background: var(--coral); right: -250px; bottom: -350px; opacity: .4; animation: drift2 27s linear 0s both; }
+  .blob.b3 { width: 500px; height: 500px; background: var(--amber); left: 45%; top: 60%; opacity: .18; animation: drift3 27s linear 0s both; }
+  @keyframes drift1 { 0% { transform: translate(0,0) scale(1) } 50% { transform: translate(500px,200px) scale(1.2) } 100% { transform: translate(200px,450px) scale(.9) } }
+  @keyframes drift2 { 0% { transform: translate(0,0) scale(1) } 50% { transform: translate(-600px,-150px) scale(.85) } 100% { transform: translate(-300px,-400px) scale(1.15) } }
+  @keyframes drift3 { 0% { transform: translate(0,0) } 100% { transform: translate(-700px,-500px) } }
+  .grain { position: absolute; inset: 0; opacity: .07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .gridlines { position: absolute; inset: 0; opacity: .06;
+    background-image: linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px);
+    background-size: 120px 120px; mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%); }
+
+  /* ---------- scene system ---------- */
+  .scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    animation: cutIn .001s linear var(--in) both, cutOut .001s linear var(--out) forwards; }
+  @keyframes cutIn { from { visibility: hidden } to { visibility: visible } }
+  @keyframes cutOut { from { visibility: visible } to { visibility: hidden } }
+
+  .a { animation-fill-mode: both; animation-delay: var(--d); }
+  .fadeUp   { animation: fadeUp .9s var(--ease) var(--d) both; }
+  .fadeIn   { animation: fadeIn .7s ease var(--d) both; }
+  .popIn    { animation: popIn .8s var(--spring) var(--d) both; }
+  .maskUp   { display: inline-block; animation: maskUp 1s var(--ease) var(--d) both; }
+  .blurIn   { animation: blurIn 1s var(--ease) var(--d) both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(60px) } to { opacity: 1; transform: none } }
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes popIn  { from { opacity: 0; transform: scale(.4) } to { opacity: 1; transform: none } }
+  @keyframes maskUp { from { transform: translateY(110%) } to { transform: none } }
+  @keyframes blurIn { from { opacity: 0; filter: blur(30px); transform: scale(1.15) } to { opacity: 1; filter: blur(0); transform: none } }
+  .mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .08em; }
+
+  .gradText { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ---------- transitions (wipes) ---------- */
+  .wipe { position: absolute; inset: -10% -20%; z-index: 50; transform: translateX(-120%) skewX(-12deg);
+    animation: wipe 1s var(--ease-io) var(--d) both; }
+  .wipe.w1 { background: var(--grad); }
+  .wipe.w2 { background: var(--bg); animation-delay: calc(var(--d) + .08s); }
+  @keyframes wipe { 0% { transform: translateX(-120%) skewX(-12deg) } 50% { transform: translateX(0) skewX(-12deg) } 100% { transform: translateX(120%) skewX(-12deg) } }
+  .iris { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px; border-radius: 50%; z-index: 50;
+    background: var(--grad); animation: iris 1s var(--ease-io) var(--d) both; }
+  @keyframes iris { 0% { transform: scale(0); opacity: 1 } 50% { transform: scale(45); opacity: 1 } 100% { transform: scale(45); opacity: 0 } }
+
+  /* ---------- S1 intro ---------- */
+  .logo { display: flex; align-items: center; gap: 36px; }
+  .mark { width: 150px; height: 150px; border-radius: 40px; background: var(--grad); display: grid; place-items: center;
+    box-shadow: 0 30px 80px -20px rgba(124,92,255,.7); }
+  .mark svg { width: 84px; height: 84px; }
+  .mark.spin { animation: markIn 1.2s var(--spring) var(--d) both; }
+  @keyframes markIn { from { opacity: 0; transform: scale(0) rotate(-120deg) } to { opacity: 1; transform: none } }
+  .word { font-size: 190px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  .word span { display: inline-block; animation: letter .9s var(--ease) var(--d) both; }
+  @keyframes letter { from { opacity: 0; transform: translateY(120px) rotate(12deg) } to { opacity: 1; transform: none } }
+  .tagline { position: absolute; top: 650px; width: 100%; text-align: center; font-size: 44px; font-weight: 400; color: var(--muted); letter-spacing: .02em; }
+  .tagline b { color: var(--ink); font-weight: 600; }
+  .s1 .logo { animation: logoShift 1s var(--ease-io) 1.3s both; }
+  @keyframes logoShift { from { transform: none } to { transform: translateY(-60px) } }
+  .line { position: absolute; top: 740px; left: 50%; height: 3px; width: 360px; margin-left: -180px; background: var(--grad); transform-origin: left;
+    animation: grow 1.2s var(--ease) var(--d) both; border-radius: 3px; }
+  @keyframes grow { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+
+  /* ---------- S2 kinetic ---------- */
+  .s2 { flex-direction: column; }
+  .s2 .lead { font-size: 64px; font-weight: 500; color: var(--muted); margin-bottom: 10px; }
+  .swap { position: relative; height: 260px; width: 1600px; text-align: center; }
+  .swap > div { position: absolute; inset: 0; font-size: 230px; font-weight: 800; letter-spacing: -.05em; line-height: 1.1;
+    animation: swapIn .7s var(--ease) var(--d) both, swapOut .5s var(--ease-io) calc(var(--d) + .95s) forwards; }
+  .swap > div.last { animation: swapIn .7s var(--ease) var(--d) both; }
+  @keyframes swapIn  { from { opacity: 0; transform: translateY(140px) scale(.9); filter: blur(12px) } to { opacity: 1; transform: none; filter: blur(0) } }
+  @keyframes swapOut { from { opacity: 1; transform: none; filter: blur(0) } to { opacity: 0; transform: translateY(-140px) scale(.95); filter: blur(12px) } }
+  .ticker { position: absolute; bottom: 110px; left: 0; white-space: nowrap; font-size: 30px; font-weight: 600; letter-spacing: .3em; color: rgba(246,243,238,.25);
+    animation: ticker 6s linear 3.6s both; }
+  @keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-900px) } }
+
+  /* ---------- S3 showcase ---------- */
+  .s3 { justify-content: flex-start; padding-left: 200px; gap: 150px; }
+  .s3 .copy { width: 720px; }
+  .eyebrow { font-size: 26px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--coral); margin-bottom: 30px; }
+  .h2 { font-size: 108px; font-weight: 800; letter-spacing: -.04em; line-height: 1.02; }
+  .p { font-size: 34px; color: var(--muted); line-height: 1.5; margin-top: 36px; font-weight: 400; }
+  .phone { position: relative; width: 470px; height: 960px; border-radius: 70px; background: #050409; padding: 18px;
+    box-shadow: 0 0 0 3px #2a2640, 0 80px 160px -40px rgba(124,92,255,.55), inset 0 0 0 2px #1d1a2e;
+    animation: phoneIn 1.3s var(--ease) var(--d) both; }
+  @keyframes phoneIn { from { opacity: 0; transform: translateY(700px) rotate(12deg) } to { opacity: 1; transform: rotate(-4deg) } }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 54px; overflow: hidden; background: #f6f3ee; color: #15122a; }
+  .notch { position: absolute; top: 14px; left: 50%; width: 120px; height: 34px; margin-left: -60px; background: #050409; border-radius: 20px; z-index: 5; }
+  .appbar { position: absolute; top: 0; left: 0; right: 0; height: 130px; padding: 66px 30px 0; display: flex; justify-content: space-between; align-items: center; background: #f6f3ee; z-index: 4; }
+  .appbar .brand { font-weight: 800; font-size: 30px; letter-spacing: -.03em; }
+  .cart { position: relative; width: 44px; height: 44px; }
+  .badge { position: absolute; top: -8px; right: -10px; width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: #fff;
+    font-size: 16px; font-weight: 700; display: grid; place-items: center; animation: popIn .6s var(--spring) var(--d) both; }
+  .feed { position: absolute; top: 130px; left: 0; right: 0; padding: 0 24px; animation: scrollFeed 1.6s var(--ease-io) var(--d) both; }
+  @keyframes scrollFeed { from { transform: none } to { transform: translateY(-300px) } }
+  .hero { height: 220px; border-radius: 28px; background: var(--grad); padding: 30px; color: #fff; position: relative; overflow: hidden; }
+  .hero small { font-size: 16px; letter-spacing: .2em; font-weight: 600; opacity: .85; }
+  .hero h3 { font-size: 40px; font-weight: 800; line-height: 1.05; margin-top: 10px; letter-spacing: -.03em; }
+  .hero .circ { position: absolute; right: -40px; bottom: -60px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,.2); }
+  .chips { display: flex; gap: 10px; margin: 22px 0; }
+  .chip { padding: 10px 18px; border-radius: 30px; font-size: 16px; font-weight: 600; background: #e9e5f5; }
+  .chip.on { background: #15122a; color: #fff; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: #fff; border-radius: 24px; padding: 14px; box-shadow: 0 10px 30px -12px rgba(21,18,42,.18); position: relative; }
+  .card .img { height: 170px; border-radius: 16px; display: grid; place-items: center; }
+  .card .img svg { width: 110px; height: 110px; }
+  .card .t { font-size: 17px; font-weight: 600; margin-top: 12px; }
+  .card .pr { font-size: 18px; font-weight: 800; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+  .plus { width: 34px; height: 34px; border-radius: 12px; background: #15122a; color: #fff; display: grid; place-items: center; font-size: 22px; font-weight: 500; position: relative; }
+  .plus.hit { animation: hit .5s var(--ease) var(--d) both; }
+  @keyframes hit { 0% { transform: scale(1); background: #15122a } 40% { transform: scale(.75); background: var(--coral) } 100% { transform: scale(1); background: var(--coral) } }
+  .tap { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,107,139,.9); z-index: 6; pointer-events: none;
+    animation: ripple .7s var(--ease) var(--d) both; }
+  @keyframes ripple { from { transform: scale(.2); opacity: 1 } to { transform: scale(1.6); opacity: 0 } }
+  .finger { position: absolute; width: 56px; height: 56px; border-radius: 50%; background: rgba(21,18,42,.25); border: 3px solid rgba(255,255,255,.9);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 7;
+    animation: fingerIn .5s ease var(--d) both, fingerMove 1s var(--ease-io) calc(var(--d) + .2s) both, fingerPress .3s ease calc(var(--d) + 1.2s) both, fadeOutK .4s ease calc(var(--d) + 1.8s) forwards; }
+  @keyframes fingerIn { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes fingerMove { from { left: 330px; top: 860px } to { left: 149px; top: 607px } }
+  @keyframes fingerPress { 0% { scale: 1 } 50% { scale: .8 } 100% { scale: 1 } }
+  @keyframes fadeOutK { to { opacity: 0 } }
+  .toast { position: absolute; left: 24px; right: 24px; bottom: 30px; height: 84px; border-radius: 24px; background: #15122a; color: #fff; z-index: 6;
+    display: flex; align-items: center; gap: 16px; padding: 0 22px; font-size: 20px; font-weight: 600;
+    animation: toastIn .8s var(--spring) var(--d) both; box-shadow: 0 20px 40px -10px rgba(21,18,42,.5); }
+  .toast .ok { width: 44px; height: 44px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; }
+  .toast span { color: #a39fb8; font-weight: 400; font-size: 16px; display: block; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(140px) } to { opacity: 1; transform: none } }
+  .floatTag { position: absolute; padding: 18px 26px; border-radius: 22px; background: rgba(255,255,255,.08); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.14); font-size: 24px; font-weight: 600; display: flex; align-items: center; gap: 14px; z-index: 8;
+    animation: popIn .8s var(--spring) var(--d) both; }
+  .floatTag i { width: 14px; height: 14px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 20px #4ade80; }
+
+  /* ---------- S4 features ---------- */
+  .s4 { flex-direction: column; gap: 80px; }
+  .s4 .h2 { text-align: center; }
+  .feats { display: flex; gap: 48px; }
+  .feat { width: 510px; height: 420px; border-radius: 40px; padding: 50px; position: relative; overflow: hidden;
+    background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.12);
+    animation: featIn 1s var(--ease) var(--d) both; }
+  @keyframes featIn { from { opacity: 0; transform: translateY(160px) rotateX(30deg) } to { opacity: 1; transform: none } }
+  .feat .ic { width: 110px; height: 110px; border-radius: 30px; background: var(--grad); display: grid; place-items: center; margin-bottom: 44px; }
+  .feat .ic svg { width: 58px; height: 58px; }
+  .feat .ic path, .feat .ic circle, .feat .ic rect, .feat .ic polyline { stroke-dasharray: 200; animation: draw 1.4s var(--ease) var(--d) both; }
+  @keyframes draw { from { stroke-dashoffset: 200 } to { stroke-dashoffset: 0 } }
+  .feat h4 { font-size: 46px; white-space: nowrap; font-weight: 800; letter-spacing: -.03em; }
+  .feat p { font-size: 28px; color: var(--muted); margin-top: 14px; line-height: 1.4; }
+  .feat .num { position: absolute; right: 40px; top: 30px; font-size: 120px; font-weight: 800; color: rgba(255,255,255,.05); }
+
+  /* ---------- S5 stats ---------- */
+  .s5 { gap: 0; }
+  .stat { width: 600px; text-align: center; position: relative; }
+  .stat + .stat::before { content: ""; position: absolute; left: 0; top: 30px; bottom: 30px; width: 2px; background: rgba(255,255,255,.12);
+    transform-origin: top; animation: growY 1s var(--ease) 18.9s both; }
+  @keyframes growY { from { transform: scaleY(0) } to { transform: none } }
+  .stat .big { white-space: nowrap; font-size: 140px; font-weight: 800; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .lbl { font-size: 34px; color: var(--muted); margin-top: 20px; }
+  .stars { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
+  .stars svg { width: 34px; height: 34px; animation: popIn .6s var(--spring) var(--d) both; }
+
+  /* ---------- S6 outro ---------- */
+  .s6 { flex-direction: column; }
+  .s6 .logo { transform: scale(.6); margin-bottom: 30px; }
+  .s6 .h1 { font-size: 120px; font-weight: 800; letter-spacing: -.045em; line-height: 1.05; text-align: center; }
+  .cta { margin-top: 70px; position: relative; overflow: hidden; padding: 34px 70px; border-radius: 100px; background: var(--ink); color: var(--bg);
+    font-size: 40px; font-weight: 700; display: flex; align-items: center; gap: 20px; }
+  .cta::after { content: ""; position: absolute; top: 0; bottom: 0; width: 120px; left: -200px; background: linear-gradient(90deg, transparent, rgba(124,92,255,.45), transparent);
+    transform: skewX(-20deg); animation: shine 1.2s ease 24.4s both; }
+  @keyframes shine { from { left: -200px } to { left: 120% } }
+  .url { margin-top: 44px; font-size: 32px; color: var(--muted); letter-spacing: .08em; }
+  .promo { position: absolute; top: 120px; right: 200px; width: 230px; height: 230px; border-radius: 50%; background: var(--grad); display: grid; place-items: center;
+    text-align: center; font-weight: 800; line-height: 1; box-shadow: 0 30px 80px -20px rgba(255,107,139,.7);
+    animation: promoIn 1s var(--spring) var(--d) both, wobble 3s ease-in-out calc(var(--d) + 1s) both; }
+  .promo b { font-size: 76px; letter-spacing: -.04em; display: block; }
+  .promo small { font-size: 22px; font-weight: 600; }
+  @keyframes promoIn { from { opacity: 0; transform: scale(0) rotate(-90deg) } to { opacity: 1; transform: rotate(12deg) } }
+  @keyframes wobble { 0%,100% { translate: 0 0 } 50% { translate: 0 -20px } }
+  .fadeBlack { position: absolute; inset: 0; background: #000; z-index: 60; animation: fadeIn 1s ease 26s both; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="gridlines"></div>
+
+  <!-- ===== S1 : INTRO (0 → 4s) ===== -->
+  <section class="scene s1" style="--in:0s; --out:4s">
+    <div class="logo">
+      <div class="mark spin" style="--d:.2s">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      </div>
+      <div class="word"><span style="--d:.5s">N</span><span style="--d:.58s">O</span><span style="--d:.66s">V</span><span style="--d:.74s">A</span></div>
+    </div>
+    <div class="line" style="--d:1.5s"></div>
+    <div class="tagline"><span class="mask"><span class="maskUp" style="--d:1.7s">Votre boutique, <b>réinventée.</b></span></span></div>
+  </section>
+
+  <!-- ===== S2 : KINETIC TYPE (4 → 8s) ===== -->
+  <section class="scene s2" style="--in:4s; --out:8s">
+    <div class="lead"><span class="mask"><span class="maskUp" style="--d:4.15s">Le shopping en ligne,</span></span></div>
+    <div class="swap">
+      <div style="--d:4.5s">plus <span class="gradText">simple.</span></div>
+      <div style="--d:5.55s">plus <span class="gradText">rapide.</span></div>
+      <div class="last" style="--d:6.6s">plus <span class="gradText">beau.</span></div>
+    </div>
+    <div class="ticker">MODE · TECH · MAISON · BEAUTÉ · LIFESTYLE · MODE · TECH · MAISON · BEAUTÉ · LIFESTYLE · MODE · TECH · MAISON · BEAUTÉ · LIFESTYLE · MODE · TECH · MAISON · BEAUTÉ</div>
+  </section>
+
+  <!-- ===== S3 : PRODUCT SHOWCASE (8 → 14s) ===== -->
+  <section class="scene s3" style="--in:8s; --out:14s">
+    <div class="copy">
+      <div class="eyebrow fadeUp" style="--d:8.35s">L'expérience</div>
+      <div class="h2"><span class="mask"><span class="maskUp" style="--d:8.45s">Trouvez.</span></span><br><span class="mask"><span class="maskUp" style="--d:8.6s">Ajoutez.</span></span><br><span class="mask"><span class="maskUp" style="--d:8.75s" ><span class="gradText">Adorez.</span></span></span></div>
+      <div class="p fadeUp" style="--d:9.1s">Une navigation fluide, des produits soigneusement sélectionnés et un panier en un seul geste.</div>
+    </div>
+    <div style="position:relative">
+      <div class="phone" style="--d:8.2s">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="appbar">
+            <div class="brand">NOVA</div>
+            <div class="cart">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#15122a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+              <div class="badge" style="--d:11.75s">1</div>
+            </div>
+          </div>
+          <div class="feed" style="--d:9.7s">
+            <div class="hero fadeUp" style="--d:8.8s"><small>NOUVELLE COLLECTION</small><h3>Automne<br>2026</h3><div class="circ"></div></div>
+            <div class="chips fadeUp" style="--d:8.95s"><div class="chip on">Tout</div><div class="chip">Audio</div><div class="chip">Montres</div><div class="chip">Sacs</div></div>
+            <div class="grid">
+              <div class="card fadeUp" style="--d:9.05s">
+                <div class="img" style="background:#ece7ff"><svg viewBox="0 0 64 64" fill="none"><path d="M12 38v-6a20 20 0 0 1 40 0v6" stroke="#15122a" stroke-width="4" stroke-linecap="round"/><rect x="8" y="34" width="12" height="20" rx="6" fill="#7c5cff"/><rect x="44" y="34" width="12" height="20" rx="6" fill="#7c5cff"/></svg></div>
+                <div class="t">Casque Aura</div><div class="pr">149 €<div class="plus">+</div></div>
+              </div>
+              <div class="card fadeUp" style="--d:9.15s">
+                <div class="img" style="background:#ffe6ec"><svg viewBox="0 0 64 64" fill="none"><rect x="24" y="4" width="16" height="14" rx="3" fill="#15122a"/><rect x="24" y="46" width="16" height="14" rx="3" fill="#15122a"/><circle cx="32" cy="32" r="16" fill="#ff6b8b"/><circle cx="32" cy="32" r="11" fill="#fff"/><path d="M32 26v6l4 3" stroke="#15122a" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+                <div class="t">Montre Orbit</div><div class="pr">229 €<div class="plus">+</div></div>
+              </div>
+              <div class="card fadeUp" style="--d:9.25s">
+                <div class="img" style="background:#fff1df"><svg viewBox="0 0 64 64" fill="none"><path d="M22 22v-4a10 10 0 0 1 20 0v4" stroke="#15122a" stroke-width="4" stroke-linecap="round"/><rect x="12" y="22" width="40" height="34" rx="8" fill="#ffb86b"/><rect x="26" y="32" width="12" height="5" rx="2.5" fill="#15122a"/></svg></div>
+                <div class="t">Sac Lune</div><div class="pr">89 €<div class="plus hit" style="--d:11.45s">+</div></div>
+              </div>
+              <div class="card fadeUp" style="--d:9.35s">
+                <div class="img" style="background:#e3f6ee"><svg viewBox="0 0 64 64" fill="none"><rect x="26" y="6" width="12" height="10" rx="2" fill="#15122a"/><rect x="16" y="16" width="32" height="42" rx="10" fill="#4ade80" opacity=".85"/><rect x="22" y="28" width="20" height="14" rx="3" fill="#fff" opacity=".8"/></svg></div>
+                <div class="t">Parfum Éclat</div><div class="pr">65 €<div class="plus">+</div></div>
+              </div>
+              <div class="card"><div class="img" style="background:#ece7ff"></div><div class="t">Enceinte Halo</div><div class="pr">119 €<div class="plus">+</div></div></div>
+              <div class="card"><div class="img" style="background:#ffe6ec"></div><div class="t">Lunettes Sol</div><div class="pr">95 €<div class="plus">+</div></div></div>
+            </div>
+          </div>
+          <div class="finger" style="--d:10.3s"></div>
+          <div class="tap" style="--d:11.5s; left:142px; top:600px"></div>
+          <div class="toast" style="--d:11.9s">
+            <div class="ok"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg></div>
+            <div>Ajouté au panier<span>Sac Lune · 89 €</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="floatTag" style="--d:10.0s; right:-330px; top:150px"><i></i>En stock · expédié aujourd'hui</div>
+      <div class="floatTag" style="--d:12.3s; right:-250px; bottom:170px">★ 4,9 · 2 300 avis</div>
+    </div>
+  </section>
+
+  <!-- ===== S4 : FEATURES (14 → 18.5s) ===== -->
+  <section class="scene s4" style="--in:14s; --out:18.5s">
+    <div class="h2"><span class="mask"><span class="maskUp" style="--d:14.3s">Pensé pour <span class="gradText">vous.</span></span></span></div>
+    <div class="feats">
+      <div class="feat" style="--d:14.6s"><div class="num">01</div>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="--d:14.9s"><rect x="1" y="6" width="14" height="10" rx="1" style="--d:14.9s"/><path d="M15 9h4l3 3v4h-7z" style="--d:15s"/><circle cx="6" cy="18" r="2" style="--d:15.1s"/><circle cx="18" cy="18" r="2" style="--d:15.1s"/></svg></div>
+        <h4>Livraison 24h</h4><p>Offerte dès 50 € partout en France.</p></div>
+      <div class="feat" style="--d:14.75s"><div class="num">02</div>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" style="--d:15.05s"/><polyline points="8.5 12 11 14.5 15.5 9.5" style="--d:15.3s"/></svg></div>
+        <h4>Paiement sécurisé</h4><p>CB, Apple Pay, PayPal ou en 3× sans frais.</p></div>
+      <div class="feat" style="--d:14.9s"><div class="num">03</div>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7" style="--d:15.2s"/><polyline points="3 3 3 9 9 9" style="--d:15.4s"/></svg></div>
+        <h4>Retours gratuits</h4><p>30 jours pour changer d'avis, sans question.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== S5 : STATS (18.5 → 22s) ===== -->
+  <section class="scene s5" style="--in:18.5s; --out:22s">
+    <div class="stat fadeUp" style="--d:18.7s"><div class="big gradText" data-count="50000" data-from="18.8" data-dur="1.6" data-fmt="k">0</div><div class="lbl">clients satisfaits</div></div>
+    <div class="stat fadeUp" style="--d:18.85s"><div class="big" data-count="4.9" data-from="18.95" data-dur="1.4" data-fmt="dec">0</div>
+      <div class="stars">
+        <svg style="--d:19.6s" viewBox="0 0 24 24" fill="#ffb86b"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+        <svg style="--d:19.7s" viewBox="0 0 24 24" fill="#ffb86b"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+        <svg style="--d:19.8s" viewBox="0 0 24 24" fill="#ffb86b"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+        <svg style="--d:19.9s" viewBox="0 0 24 24" fill="#ffb86b"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+        <svg style="--d:20.0s" viewBox="0 0 24 24" fill="#ffb86b"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+      </div>
+      <div class="lbl" style="margin-top:12px">note moyenne</div></div>
+    <div class="stat fadeUp" style="--d:19s"><div class="big gradText" data-count="98" data-from="19.1" data-dur="1.5" data-fmt="pct">0</div><div class="lbl">recommandent NOVA</div></div>
+  </section>
+
+  <!-- ===== S6 : OUTRO / CTA (22 → 27s) ===== -->
+  <section class="scene s6" style="--in:22s; --out:99s">
+    <div class="logo blurIn" style="--d:22.3s">
+      <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div>
+      <div class="word">NOVA</div>
+    </div>
+    <div class="h1"><span class="mask"><span class="maskUp" style="--d:22.7s">Découvrez la nouvelle</span></span><br><span class="mask"><span class="maskUp" style="--d:22.85s"><span class="gradText">collection.</span></span></span></div>
+    <div class="cta popIn" style="--d:23.5s">Commander maintenant
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0b0a14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="url fadeIn" style="--d:24s">www.nova-store.fr</div>
+    <div class="promo" style="--d:23.9s"><div><b>-20%</b><small>1ʳᵉ commande</small></div></div>
+  </section>
+
+  <!-- ===== Transitions ===== -->
+  <div class="wipe w1" style="--d:3.5s"></div><div class="wipe w2" style="--d:3.5s"></div>
+  <div class="wipe w1" style="--d:7.5s"></div><div class="wipe w2" style="--d:7.5s"></div>
+  <div class="wipe w1" style="--d:13.5s"></div><div class="wipe w2" style="--d:13.5s"></div>
+  <div class="iris" style="--d:18s"></div>
+  <div class="wipe w1" style="--d:21.5s"></div><div class="wipe w2" style="--d:21.5s"></div>
+  <div class="fadeBlack"></div>
+
+  <div class="grain"></div>
+</div>
+
+<script>
+  // Deterministic, frame-accurate timeline: the renderer calls seek(t) for every frame.
+  const easeOutExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+  const counters = [...document.querySelectorAll('[data-count]')];
+  function fmt(el, v) {
+    switch (el.dataset.fmt) {
+      case 'k':   return Math.round(v).toLocaleString('fr-FR').replace(/ | /g, ' ') + '+';
+      case 'dec': return v.toFixed(1).replace('.', ',');
+      case 'pct': return Math.round(v) + '%';
+    }
+  }
+  window.seek = (t) => {
+    for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; }
+    for (const el of counters) {
+      const p = Math.min(Math.max((t - +el.dataset.from) / +el.dataset.dur, 0), 1);
+      el.textContent = fmt(el, easeOutExpo(p) * +el.dataset.count);
+    }
+  };
+  window.seek(+(new URLSearchParams(location.search).get('t') || 0));
+</script>
+</body>
+</html>
